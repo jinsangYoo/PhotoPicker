@@ -53,6 +53,41 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+    private val pickImageMedia = registerForActivityResult(PickImage()) { uri ->
+        binding.resultForMultiple.text = ""
+        // Callback is invoked after the user selects a media item or closes the
+        // photo picker.
+        if (uri != null) {
+            binding.result.text = "Selected URI: $uri"
+            Log.d("PhotoPicker", "Selected URI: $uri")
+        } else {
+            binding.result.text = "No media selected"
+            Log.d("PhotoPicker", "No media selected")
+        }
+    }
+
+    private val pickImageMultipleMedia =
+        registerForActivityResult(PickImages(5)) { uris ->
+            binding.resultForMultiple.text = ""
+            // Callback is invoked after the user selects media items or closes the
+            // photo picker.
+            if (uris.isNotEmpty()) {
+                binding.result.text = "Number of items selected: ${uris.size}"
+                Log.d("PhotoPicker", "Number of items selected: ${uris.size}")
+                StringBuilder().apply {
+                    append("Selected URIs:")
+                    for (uri in uris) {
+                        Log.d("PhotoPicker", "Selected URI: $uri")
+                        append("\n$uri")
+                    }
+                    binding.resultForMultiple.text = toString()
+                }
+            } else {
+                binding.result.text = "No media selected"
+                Log.d("PhotoPicker", "No media selected")
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -99,6 +134,14 @@ class MainActivity : AppCompatActivity() {
 
         binding.btnMultiOnlyImagesCamera.setOnClickListener {
             pickMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+
+        binding.pickImage.setOnClickListener {
+            pickImageMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.SingleMimeType("image/*")))
+        }
+
+        binding.pickImages.setOnClickListener {
+            pickImageMultipleMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.SingleMimeType("image/*")))
         }
     }
 }
